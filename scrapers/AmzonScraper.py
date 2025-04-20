@@ -2,8 +2,6 @@ import re
 import json
 import traceback
 
-import requests
-from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 
 from services.save_product_price import save_price_history
@@ -44,6 +42,7 @@ class AmazonScraper(BaseScraper):
             offer_data = []
 
         return {
+            "soup": str(soup),
             "title": title,
             "price": price,
             "mrp": mrp_price,
