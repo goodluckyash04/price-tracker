@@ -21,8 +21,8 @@ def render_amazon_product(data):
             unsafe_allow_html=True
         )
         st.caption(f"🆔 **ASIN:** {data['asin']}")
-        with st.expander("📋 Price History"):
-            show_price_graph_and_table(data['asin'])
+        # with st.expander("📋 Price History"):
+        #     show_price_graph_and_table(data['asin'])
         with st.expander("📋 Full Product Title"):
             st.write(data["full_title"])
             if data.get("product_colors"):

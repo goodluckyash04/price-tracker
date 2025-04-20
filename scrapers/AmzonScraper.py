@@ -29,7 +29,7 @@ class AmazonScraper(BaseScraper):
         product_colors = {img["alt"].strip() for img in soup.select("#twister_feature_div img")}
 
         feature_imgs = [img["src"] for img in soup.select("div.aplus-v2 img[src*='.jpg']")]
-        save_price_history(asin, title, price, mrp_price)
+        # save_price_history(asin, title, price, mrp_price)
         offer_data = None
         try:
             side_sheet = soup.select_one("#itembox-InstantBankDiscount span[data-action]")
