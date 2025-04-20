@@ -8,9 +8,10 @@ class BaseScraper:
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
         }
 
-    def fetch(self):
+    def fetch(self, url=None):
         try:
-            response = requests.get(self.url, headers=self.headers)
+            url = url if url else self.url
+            response = requests.get(url, headers=self.headers)
             response.raise_for_status()
             return BeautifulSoup(response.text, "html.parser")
         except requests.exceptions.RequestException as e:
