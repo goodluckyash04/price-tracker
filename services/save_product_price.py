@@ -29,7 +29,6 @@ def save_price_history(asin, title, price, mrp):
             last = data[asin]["price_history"][-1]
             if last["price"] != entry["price"] or last["date"] != entry["date"]:
                 data[asin]["price_history"].append(entry)
-        print(data)
         # Save
         with open(file, "w") as f:
             json.dump(data, f, indent=2)
