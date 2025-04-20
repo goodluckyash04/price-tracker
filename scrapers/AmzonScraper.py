@@ -6,10 +6,12 @@ from urllib.parse import urljoin
 
 from services.save_product_price import save_price_history
 from scrapers.BaseScraper import BaseScraper
+import streamlit as st
 
 class AmazonScraper(BaseScraper):
     def get_product_details(self):
         soup = self.fetch()
+        st.code(str(soup))
         title_tag = soup.select_one("#productTitle")
         price_tag = soup.select_one("#corePriceDisplay_desktop_feature_div .a-price-whole")
 
