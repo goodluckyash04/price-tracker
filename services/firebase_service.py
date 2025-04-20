@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Determine if the app is running in Streamlit or locally
-if "STREAMLIT_RUNTIME" in os.environ:
+if st.secrets:
     if "firebase" not in st.secrets:
         st.error("Firebase configuration is missing from Streamlit secrets.")
         raise ValueError("Firebase configuration is missing")
