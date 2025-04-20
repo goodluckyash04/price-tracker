@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+import streamlit as st
 
 class BaseScraper:
     def __init__(self, url: str):
@@ -12,8 +13,8 @@ class BaseScraper:
         try:
             url = url if url else self.url
             response = requests.get(url, headers=self.headers)
-            print(url[:15], response.status_code)
-            response.raise_for_status()
+            if response.status_code != 200:
+                st.error(f"{response.status_code} : {response.text}")
             return BeautifulSoup(response.text, "html.parser")
         except requests.exceptions.RequestException as e:
             raise Exception(f"Request failed: {e}")
