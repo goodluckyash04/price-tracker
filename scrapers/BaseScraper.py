@@ -12,6 +12,7 @@ class BaseScraper:
         try:
             url = url if url else self.url
             response = requests.get(url, headers=self.headers)
+            print(url[:15], response.status_code)
             response.raise_for_status()
             return BeautifulSoup(response.text, "html.parser")
         except requests.exceptions.RequestException as e:
