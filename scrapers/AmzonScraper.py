@@ -1,5 +1,7 @@
 import re
 import json
+import traceback
+
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
@@ -29,16 +31,16 @@ class AmazonScraper(BaseScraper):
         product_colors = {img["alt"].strip() for img in soup.select("#twister_feature_div img")}
 
         feature_imgs = [img["src"] for img in soup.select("div.aplus-v2 img[src*='.jpg']")]
-        # save_price_history(asin, title, price, mrp_price)
+        save_price_history(asin, title, price, mrp_price)
         offer_data = None
         try:
             side_sheet = soup.select_one("#itembox-InstantBankDiscount span[data-action]")
             offer_data_obj = json.loads(side_sheet["data-side-sheet"])
             offer_url = f"https://www.amazon.in/gp/product/ajax?asin={asin}&deviceType=web&offerType={offer_data_obj['contentId']}&buyingOptionIndex=0&additionalParams=merchantId:{offer_data_obj['encryptedMerchantId']}smid={offer_data_obj['smid']}&encryptedMerchantId={offer_data_obj['encryptedMerchantId']}&sr={offer_data_obj['sr']}&experienceId=vsxOffersSecondaryView&showFeatures=vsxoffers&featureParams=OfferType:{offer_data_obj['contentId']},DeviceType:web"
-            offer_res = requests.get(offer_url)
-            offer_soup = BeautifulSoup(offer_res.text, "html.parser")
+            offer_soup = self.fetch(offer_url)
             offer_data = [i.p.text.strip() for i in offer_soup.select(".vsx-offers-desktop-lv__item")]
         except Exception:
+            traceback.print_exc()
             offer_data = []
 
         return {
