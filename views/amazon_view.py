@@ -7,8 +7,6 @@ from services.firebase_service import db
 def render_amazon_product(data):
     st.markdown(f"## 🛍️ {data['title']}")
 
-    st.code(data["soup"])
-
     col1, col2 = st.columns([2, 1])
     with col1:
         st.markdown(
