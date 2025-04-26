@@ -29,23 +29,22 @@ def render_amazon_product(data):
 
             s_feature = "".join([
                 f"""<span style="
-                                    background-color: #f5f5f5;
-                                    border: 1px solid #ccc;
-                                    border-radius: 12px;
-                                    padding: 6px 14px;
-                                    margin: 4px;
-                                    display: inline-block;
-                                    font-size: 14px;
-                                ">{color}</span>""" for color in sorted(data["site_features"])
+                    color: green;
+                    border: 1px solid #ccc;
+                    border-radius: 12px;
+                    padding: 6px 14px;
+                    margin: 4px;
+                    display: inline-block;
+                    font-size: 14px;
+                ">{color}</span>""" for color in sorted(data["site_features"])
             ])
-            st.caption(s_feature, unsafe_allow_html=True)
+            st.markdown(s_feature, unsafe_allow_html=True)
 
             if data.get("product_colors"):
                 st.markdown("##### 🎨 Available Colors")
 
                 colors_html = "".join([
                     f"""<span style="
-                        background-color: #f5f5f5;
                         border: 1px solid #ccc;
                         border-radius: 12px;
                         padding: 6px 14px;

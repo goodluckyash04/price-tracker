@@ -6,6 +6,7 @@ from services.firebase_service import db
 
 
 def save_price_history(asin, title, price, mrp, domain=""):
+    print(domain)
     try:
         # Prepare entry
         entry = {
@@ -36,7 +37,7 @@ def save_price_history(asin, title, price, mrp, domain=""):
                 "asin": asin,
                 "price_history": [entry],
                 "domain": domain.title(),
-                "latest_captured_at":datetime.now().strftime("%d %B %Y %H:%M")
+                "latest_captured_at": datetime.now().strftime("%d %B %Y %H:%M")
             })
 
     except Exception as e:

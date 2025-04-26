@@ -5,7 +5,7 @@ from scrapers.AmzonScraper import AmazonScraper
 from services.firebase_service import db
 
 # --- Page Setup ---
-st.set_page_config(page_title="Product List", layout="wide")
+st.set_page_config(page_title="📦 Product List", layout="wide")
 
 # --- Load Products from Firebase ---
 product_collection = db.collection("products")
@@ -43,6 +43,7 @@ filtered_df["Latest Captured"] = pd.to_datetime(filtered_df["Latest Captured"], 
 
 # Sort by Latest Captured (newest first)
 filtered_df = filtered_df.sort_values(by="Latest Captured", ascending=False)
+
 if search_asin:
     filtered_df = filtered_df[filtered_df["ASIN"].str.contains(search_asin.strip(), case=False, na=False)]
 
@@ -50,46 +51,57 @@ if search_asin:
 if filtered_df.empty:
     st.warning("⚠️ No products found for your search.")
 else:
-    # --- Table Header ---
-    header_cols = st.columns([3, 6, 3, 2, 2, 2, 2, 2])
-    header_cols[0].markdown("**ASIN**")
-    header_cols[1].markdown("**Title**")
-    header_cols[2].markdown("**Latest Captured**")
-    header_cols[3].markdown("**Domain**")
-    header_cols[4].markdown("**Lowest**")
-    header_cols[5].markdown("**Highest**")
-    header_cols[6].markdown("**Latest**")
-    header_cols[7].markdown("**Action**")
+    # --- Build a nice display DataFrame ---
+    display_df = pd.DataFrame({
+        "ASIN": filtered_df["ASIN"],
+        "Title": filtered_df["Title"],
+        "Latest Captured": filtered_df["Latest Captured"].dt.strftime("%Y-%m-%d %H:%M:%S"),
+        "Domain": filtered_df["Domain"],
+        "Lowest Price": None,
+        "Highest Price": None,
+        "Latest Price": None,
+    })
 
-    # --- Table Body ---
-    for index, row in filtered_df.iterrows():
-        cols = st.columns([3, 6, 3, 2, 2, 2, 2, 2])
-
-        cols[0].write(f"[{row['ASIN']}](https://www.amazon.in/dp/{row['ASIN']})")
-        cols[1].write(row["Title"])
-        cols[2].write(str(row["Latest Captured"]))
-        cols[3].write(row["Domain"])
-
-        # --- Price Stats ---
+    # Fill in price stats
+    for idx, row in filtered_df.iterrows():
         price_history = row.get("price_history", [])
         if price_history:
             history_df = pd.DataFrame(price_history)
             history_df['date'] = pd.to_datetime(history_df['date'], errors="coerce")
 
-            lowest_price = history_df['price'].min()
-            highest_price = history_df['price'].max()
-            latest_price = history_df.sort_values('date', ascending=False).iloc[0]['price']
+            display_df.at[idx, "Lowest Price"] = f"₹{history_df['price'].min()}"
+            display_df.at[idx, "Highest Price"] = f"₹{history_df['price'].max()}"
+            display_df.at[idx, "Latest Price"] = f"₹{history_df.sort_values('date', ascending=False).iloc[0]['price']}"
         else:
-            lowest_price = highest_price = latest_price = "N/A"
+            display_df.at[idx, "Lowest Price"] = "-"
+            display_df.at[idx, "Highest Price"] = "-"
+            display_df.at[idx, "Latest Price"] = "-"
 
-        cols[4].write(f"₹{lowest_price}" if lowest_price != "N/A" else "-")
-        cols[5].write(f"₹{highest_price}" if highest_price != "N/A" else "-")
-        cols[6].write(f"₹{latest_price}" if latest_price != "N/A" else "-")
+    # --- Display the Table ---
+    st.dataframe(display_df, use_container_width=True, hide_index=True)
 
-        # --- Action Button ---
-        if cols[7].button("🔄", key=f"refresh_{index}"):
-            if row["Domain"] == "Amazon":
-                with st.spinner("🔄 Fetching latest data..."):
-                    scraper = AmazonScraper(f"https://www.amazon.in/dp/{row['ASIN']}").get_product_details()
-                    st.success(f"✅ Successfully fetched product: {row['ASIN']}")
-                st.rerun()
+    # --- Refresh Section ---
+    st.markdown("### 🔄 Refresh Product Info")
+
+    # Create display options with ASIN + Title
+    options = [
+        f"{row['ASIN']} - {row['Title']}" for idx, row in filtered_df.iterrows()
+    ]
+
+    # Create a mapping from "ASIN - Title" back to ASIN
+    asin_mapping = {
+        f"{row['ASIN']} - {row['Title']}": row['ASIN'] for idx, row in filtered_df.iterrows()
+    }
+
+    selected_option = st.selectbox("Select a product to refresh", options)
+
+    # Get ASIN from selection
+    selected_asin = asin_mapping[selected_option]
+
+    if st.button("Refresh Selected Product"):
+        selected_row = filtered_df[filtered_df["ASIN"] == selected_asin].iloc[0]
+        if selected_row["Domain"] == "Amazon":
+            with st.spinner("🔄 Fetching latest data..."):
+                scraper = AmazonScraper(f"https://www.amazon.in/dp/{selected_row['ASIN']}").get_product_details()
+                st.success(f"✅ Successfully fetched product: {selected_row['ASIN']}")
+            st.rerun()
