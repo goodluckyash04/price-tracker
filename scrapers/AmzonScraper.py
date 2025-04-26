@@ -6,7 +6,6 @@ from urllib.parse import urljoin
 
 from services.save_product_price import save_price_history
 from scrapers.BaseScraper import BaseScraper
-import streamlit as st
 
 class AmazonScraper(BaseScraper):
     def get_product_details(self):
@@ -24,13 +23,15 @@ class AmazonScraper(BaseScraper):
         mrp_price = re.search(r"^M.R.P.:\s*₹\s*([\d\s,.]+)", mrp_price_tag.text.strip()).group(1).strip()
         asin = soup.find("th", string=re.compile("ASIN")).find_next_sibling().text.strip()
         img = soup.select_one("#main-image-container li.image img")["src"]
+        '''# landingImage selector for main image'''
+        product_images =[img["src"].replace("_SS100","") for img in soup.select("body #altImages img[src*='.jpg']") if "play-button" not in img["src"]]
         bullets = [li.text.strip() for li in soup.select("#feature-bullets li")]
         in_box = [li.text.strip() for li in soup.select("#whatsInTheBoxDeck li")]
-
+        site_features = [item.text.strip() for item in soup.select("ol.a-carousel .icon-content")]
         product_colors = {img["alt"].strip() for img in soup.select("#twister_feature_div img")}
 
         feature_imgs = [img["src"] for img in soup.select("div.aplus-v2 img[src*='.jpg']")]
-        save_price_history(asin, title, price, mrp_price)
+        save_price_history(asin, title, price, mrp_price, "Amazon")
         offer_data = None
         try:
             side_sheet = soup.select_one("#itembox-InstantBankDiscount span[data-action]")
@@ -50,11 +51,13 @@ class AmazonScraper(BaseScraper):
             "full_title": full_title,
             "asin": asin,
             "image": img,
+            "product_images": product_images,
             "bullets": bullets,
             "box_contents": in_box,
             "features": feature_imgs,
             "offers": offer_data,
             "product_colors": product_colors,
+            "site_features": site_features,
             "technical_details_html": self._extract_details_table(soup)
         }
 

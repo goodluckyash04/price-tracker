@@ -1,9 +1,6 @@
-import json
-
 import requests
-import streamlit
 from bs4 import BeautifulSoup
-import streamlit as st
+
 
 class BaseScraper:
     def __init__(self, url: str):
@@ -22,13 +19,19 @@ class BaseScraper:
             self.headers.update(headers)
         try:
             url = url if url else self.url
-            st.text(url[:150])
             response = requests.get(url, headers=self.headers)
-            st.text(response.status_code)
-            st.json(json.dumps(dict(response.request.headers)))
+            # self.check_response(response)  # Validate response
             return BeautifulSoup(response.text, "html.parser")
         except requests.exceptions.RequestException as e:
             raise Exception(f"Request failed: {e}")
 
     def get_product_details(self):
         raise NotImplementedError("This method should be implemented by subclasses")
+
+    def check_response(self, response):
+        import json
+        import streamlit as st
+
+        st.text(response.url[:150])
+        st.text(response.status_code)
+        st.json(json.dumps(dict(response.request.headers)))

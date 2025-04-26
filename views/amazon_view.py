@@ -19,12 +19,27 @@ def render_amazon_product(data):
                 """,
             unsafe_allow_html=True
         )
-        st.caption(f"🆔 **ASIN:** {data['asin']}")
-        with st.expander("📋 Price History"):
+        st.caption(f"**ASIN:** {data['asin']}")
+
+        with st.expander("🕰️ Price History"):
             show_price_graph_and_table(data['asin'])
 
         with st.expander("📋 Product Description"):
             st.write(data["full_title"])
+
+            s_feature = "".join([
+                f"""<span style="
+                                    background-color: #f5f5f5;
+                                    border: 1px solid #ccc;
+                                    border-radius: 12px;
+                                    padding: 6px 14px;
+                                    margin: 4px;
+                                    display: inline-block;
+                                    font-size: 14px;
+                                ">{color}</span>""" for color in sorted(data["site_features"])
+            ])
+            st.caption(s_feature, unsafe_allow_html=True)
+
             if data.get("product_colors"):
                 st.markdown("##### 🎨 Available Colors")
 
@@ -41,7 +56,8 @@ def render_amazon_product(data):
                 ])
 
                 st.markdown(colors_html, unsafe_allow_html=True)
-        with st.expander("📋 See Product Detail"):
+
+        with st.expander("🛠️ See Product Detail"):
 
             # 📝 About This Item
             if data["bullets"]:
@@ -91,29 +107,23 @@ def render_amazon_product(data):
                 show_offer_section("EMI Offers", emi_offers, "📆")
                 show_offer_section("Other Offers", others, "🎁")
 
+        # 🖼️ Product Features (Images)
+        product_images = data["product_images"][1:] + data["features"]
+        if product_images:
+            with st.expander("### 📷 Product Features"):
+                for i in range(0, len(product_images), 4):
+                    cols = st.columns(4)
+                    for j, img_url in enumerate(product_images[i:i + 4]):
+                        with cols[j]:
+                            st.image(img_url, use_container_width=True)
+
     with col2:
-        st.image(data["image"], use_container_width=True)
-
-
-
-    # 🖼️ Product Features (Images)
-    if data["features"]:
-        st.markdown("### 🖼️ Product Features")
-        for i in range(0, len(data["features"]), 4):
-            cols = st.columns(4)
-            for j, img_url in enumerate(data["features"][i:i + 4]):
-                with cols[j]:
-                    st.image(img_url, use_container_width=True)
-
-
+        st.image(data["product_images"][0], use_container_width=True)
 
 
 def show_price_graph_and_table(asin):
     try:
-        # Reference to the product in Firestore (use ASIN as the document ID)
         product_ref = db.collection('products').document(asin)
-
-        # Fetch the product data from Firestore
         product_doc = product_ref.get()
 
         if product_doc.exists:
@@ -124,19 +134,23 @@ def show_price_graph_and_table(asin):
             price_history = product_data.get("price_history", [])
 
             # Convert price history to a DataFrame
-            df = pd.DataFrame(price_history)
+            df = pd.DataFrame(price_history, index=None)
             df["mrp"].fillna(0, inplace=True)
-            df["price"] = df["price"].astype(int)  # Convert price to integer
-            df["mrp"] = df["mrp"].astype(float)  # Convert price to integer
-            df["date"] = pd.to_datetime(df["date"], format="%d %B %Y %H:%M")
+            df["Price"] = df["price"].astype(int)  # Convert price to integer
+            df["MRP"] = df["mrp"].astype(float)  # Convert price to integer
+            df["Date"] = pd.to_datetime(df["date"], format="%d %B %Y %H:%M")
+            df["OnlyDate"] = pd.to_datetime(df["Date"]).dt.date
+
+            # Drop duplicate entries based on Date, MRP, and Price
+            unique_df = df.drop_duplicates(subset=["OnlyDate", "MRP", "Price"])
+            unique_df = unique_df[["Date", "MRP", "Price"]].sort_values("Date", ascending=False)
 
             # Plot line chart with date-time on x-axis
-            st.line_chart(df.set_index("date")["price"])
+            st.line_chart(df.set_index("Date")["Price"])
 
             # Show the time-stamped prices in a table
             st.markdown("### 📊 Detailed Price History (Date & Time)")
-            st.write(df[["date", "mrp", "price"]].sort_values("date", ascending=False))
-
+            st.dataframe(unique_df, hide_index=True)
         else:
             st.warning("No history found for this product.")
 
