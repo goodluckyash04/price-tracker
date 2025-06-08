@@ -61,9 +61,17 @@ def guard():
             REDIRECT_URL = os.getenv('REDIRECT_URL')
 
         components.html(f"""
-            <script>
-                window.location.replace("{REDIRECT_URL}");
-            </script>
-            <p>If you're not redirected, <a href="{REDIRECT_URL}">click here</a>.</p>
-        """, height=0)
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta http-equiv="refresh" content="0; url={REDIRECT_URL}" />
+                <script>
+                    window.top.location.href = "{REDIRECT_URL}";
+                </script>
+            </head>
+            <body>
+                <p>If you are not redirected automatically, <a href="{REDIRECT_URL}">click here</a>.</p>
+            </body>
+            </html>
+        """, height=100)
         st.stop()
