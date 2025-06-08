@@ -60,18 +60,19 @@ def guard():
             # Local development
             REDIRECT_URL = os.getenv('REDIRECT_URL')
 
-        components.html(f"""
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta http-equiv="refresh" content="0; url={REDIRECT_URL}" />
-                <script>
-                    window.top.location.href = "{REDIRECT_URL}";
-                </script>
-            </head>
-            <body>
-                <p>If you are not redirected automatically, <a href="{REDIRECT_URL}">click here</a>.</p>
-            </body>
-            </html>
-        """, height=100)
+        st.markdown(f"""
+            <div style="text-align:center; padding-top:50px;">
+                <h2 style="color:red;">⛔ Session expired or access denied</h2>
+                <p>Please visit <a href="https://myhelperbuddy.pythonanywhere.com" style="color:#ccc48e;text-decoration:none;"><b>myHelperBuddy</b></a> to access this page.</p>
+                    <p>OR</p>
+                <a href="{REDIRECT_URL}" target="_top" style="
+                    background-color:#ccc48e;
+                    padding: 10px 20px;
+                    color: white;
+                    text-decoration: none;
+                    border-radius: 5px;
+                    font-weight: bold;
+                ">🔐 Click Here</a>
+            </div>
+        """, unsafe_allow_html=True)
         st.stop()
