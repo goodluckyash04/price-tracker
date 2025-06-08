@@ -4,6 +4,8 @@ import requests
 from dotenv import load_dotenv
 from streamlit.errors import StreamlitSecretNotFoundError
 from datetime import datetime, timedelta
+import streamlit.components.v1 as components    
+
 
 load_dotenv()
 
@@ -57,9 +59,11 @@ def guard():
         except StreamlitSecretNotFoundError:
             # Local development
             REDIRECT_URL = os.getenv('REDIRECT_URL')
-            
-        st.markdown(f"""
-            <meta http-equiv="refresh" content="0; url={REDIRECT_URL}">
-            If you're not redirected automatically, <a href="{REDIRECT_URL}">click here</a>.
-        """, unsafe_allow_html=True)
+
+        components.html(f"""
+            <script>
+                window.location.replace("{REDIRECT_URL}");
+            </script>
+            <p>If you're not redirected, <a href="{REDIRECT_URL}">click here</a>.</p>
+        """, height=0)
         st.stop()
