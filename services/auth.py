@@ -59,7 +59,7 @@ def guard():
             REDIRECT_URL = os.getenv('REDIRECT_URL')
             
         st.markdown(f"""
-            <meta http-equiv="refresh" content="0; url={REDIRECT_URL}">
+            <!-- <meta http-equiv="refresh" content="0; url={REDIRECT_URL}"> -->
             If you're not redirected automatically, <a href="{REDIRECT_URL}">click here</a>.
         """, unsafe_allow_html=True)
         st.stop()
