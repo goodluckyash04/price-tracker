@@ -65,7 +65,7 @@ def guard():
                 <h2 style="color:red;">⛔ Session expired or access denied</h2>
                 <p>Please visit <a href="https://myhelperbuddy.pythonanywhere.com" style="color:#ccc48e;text-decoration:none;"><b>myHelperBuddy</b></a> to access this page.</p>
                     <p>OR</p>
-                <a href="{REDIRECT_URL}" target="_self" style="
+                <a href="{REDIRECT_URL}" style="
                     background-color:#ccc48e;
                     padding: 10px 20px;
                     color: white;
