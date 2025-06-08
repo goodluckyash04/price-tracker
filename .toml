@@ -10,3 +10,8 @@ token_uri="https://oauth2.googleapis.com/token"
 auth_provider_x509_cert_url="https://www.googleapis.com/oauth2/v1/certs"
 client_x509_cert_url="https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40myhelperbuddy-04.iam.gserviceaccount.com"
 universe_domain="googleapis.com"
+
+[myhelperbuddy]
+AUTHENTICATE_URL="https://myhelperbuddy.pythonanywhere.com/user-authentication/"
+REDIRECT_URL="https://myhelperbuddy.pythonanywhere.com/advance-utils/"
+TIMEOUT=60

@@ -5,6 +5,9 @@ from urllib.parse import urlparse
 from scrapers.AmzonScraper import AmazonScraper
 from views.amazon_view import render_amazon_product
 
+from services.auth import guard
+
+guard()
 
 SUPPORTED_DOMAINS = {
     "www.amazon.in": {
@@ -14,7 +17,7 @@ SUPPORTED_DOMAINS = {
     # Add other domains like "www.flipkart.com": { "scrapers": ..., "view": ... }
 }
 
-st.set_page_config(page_title="Track Product", layout="wide")
+st.set_page_config(page_title="Track Product", layout="wide",page_icon="📦")
 st.title("🛒 Product Tracker")
 
 url = st.text_input("Product URL", placeholder="Enter product url or ASIN no to track")

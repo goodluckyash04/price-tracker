@@ -4,8 +4,12 @@ import pandas as pd
 from scrapers.AmzonScraper import AmazonScraper
 from services.firebase_service import db
 
+from services.auth import guard
+
+guard()
+
 # --- Page Setup ---
-st.set_page_config(page_title="📦 Product List", layout="wide")
+st.set_page_config(page_title="Product List", layout="wide", page_icon="📦")
 
 # --- Load Products from Firebase ---
 product_collection = db.collection("products")

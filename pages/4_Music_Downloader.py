@@ -1,12 +1,13 @@
 import tempfile
 import os
 import streamlit as st
-
 import yt_dlp
 from mutagen import File as MutagenFile
 
-st.set_page_config(page_title="Audio Downloader", layout="wide")
+from services.auth import guard
 
+st.set_page_config(page_title="Audio Downloader", layout="wide", page_icon="🎵")
+guard()
 
 def download_audio(url: str, doc_type: str = "WEBM"):
     ext = "mp3" if doc_type.upper() == "MP3" else "webm"

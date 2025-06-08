@@ -4,7 +4,11 @@ import numpy as np
 from scipy.optimize import newton
 import datetime
 
-st.set_page_config(page_title="📦 XIRR Calculator", layout="wide")
+from services.auth import guard
+
+guard()
+
+st.set_page_config(page_title="XIRR Calculator", layout="wide", page_icon="📈")
 
 st.title("📈 XIRR Calculator")
 
