@@ -2,37 +2,17 @@ import re
 import streamlit as st
 import requests
 
+from assets.theme import inject_global_css, page_hero
+
 # ─────────────────────────────────────────────
-# Page config
+# Page config + shared theme
 # ─────────────────────────────────────────────
 st.set_page_config(page_title="Jio Plans", page_icon="📶", layout="wide")
+inject_global_css()
 
-# ─────────────────────────────────────────────
-# Custom CSS
-# ─────────────────────────────────────────────
+# ── Jio-specific styles ───────────────────────
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
-html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
-
-/* ── Page background ── */
-.stApp { background: #0a0f1e; }
-
-/* ── Section header ── */
-.section-header {
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: #4a9eff;
-    margin: 24px 0 12px 0;
-    padding-left: 4px;
-    border-left: 3px solid #4a9eff;
-    padding-left: 10px;
-}
-
-/* ── Plan card ── */
 .plan-card {
     background: linear-gradient(145deg, #111827, #1a2234);
     border: 1px solid #1f2d44;
@@ -43,114 +23,51 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     transition: transform 0.2s ease, border-color 0.2s ease;
     overflow: hidden;
 }
-.plan-card:hover {
-    transform: translateY(-2px);
-    border-color: #4a9eff55;
-}
+.plan-card:hover { transform: translateY(-2px); border-color: #4a9eff55; }
 .plan-card::before {
     content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
     background: linear-gradient(90deg, #4a9eff, #a855f7, #f472b6);
     opacity: 0.7;
 }
-
-/* ── Price badge ── */
 .price-badge {
     display: inline-block;
     background: linear-gradient(135deg, #4a9eff22, #a855f722);
     border: 1px solid #4a9eff44;
     border-radius: 100px;
     padding: 4px 14px;
-    font-size: 22px;
-    font-weight: 800;
-    color: #e2eaff;
-    letter-spacing: -0.5px;
-    margin-bottom: 10px;
+    font-size: 22px; font-weight: 800; color: #e2eaff;
+    letter-spacing: -0.5px; margin-bottom: 10px;
 }
 .rupee { font-size: 14px; color: #a0aec0; margin-right: 2px; }
-
-/* ── Spec pills ── */
 .specs-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
 .spec-pill {
-    background: #1e2d47;
-    border-radius: 8px;
-    padding: 5px 10px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #cbd5e1;
-    display: flex;
-    align-items: center;
-    gap: 4px;
+    background: #1e2d47; border-radius: 8px; padding: 5px 10px;
+    font-size: 12px; font-weight: 600; color: #cbd5e1;
+    display: flex; align-items: center; gap: 4px;
 }
 .spec-pill .label { color: #64748b; font-weight: 500; }
 .spec-pill .value { color: #e2eaff; }
-
-/* ── OTT chips ── */
 .ott-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .ott-chip {
-    background: #0f172a;
-    border: 1px solid #334155;
-    border-radius: 6px;
-    padding: 3px 8px;
-    font-size: 11px;
-    color: #94a3b8;
-    font-weight: 500;
+    background: #0f172a; border: 1px solid #334155; border-radius: 6px;
+    padding: 3px 8px; font-size: 11px; color: #94a3b8; font-weight: 500;
 }
-
-/* ── Badge label ── */
 .plan-badge {
-    position: absolute;
-    top: 14px; right: 14px;
+    position: absolute; top: 14px; right: 14px;
     background: linear-gradient(135deg, #f59e0b, #ef4444);
-    color: white;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 3px 8px;
-    border-radius: 100px;
-    letter-spacing: 0.5px;
+    color: white; font-size: 10px; font-weight: 700;
+    padding: 3px 8px; border-radius: 100px; letter-spacing: 0.5px;
     text-transform: uppercase;
 }
-
-/* ── Description ── */
-.plan-desc {
-    font-size: 12px;
-    color: #64748b;
-    margin-top: 8px;
-    line-height: 1.5;
-}
-
-/* ── Hero metric ── */
-.metric-box {
-    background: linear-gradient(135deg, #111827, #1a2234);
-    border: 1px solid #1f2d44;
-    border-radius: 12px;
-    padding: 16px 20px;
-    text-align: center;
-}
-.metric-box .m-val { font-size: 28px; font-weight: 800; color: #e2eaff; }
-.metric-box .m-lbl { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
-
-/* ── Note item ── */
 .note-item {
-    background: #0f172a;
-    border-left: 3px solid #4a9eff44;
-    border-radius: 0 8px 8px 0;
-    padding: 6px 10px;
-    font-size: 11px;
-    color: #64748b;
-    margin-top: 6px;
-    line-height: 1.5;
+    background: #0f172a; border-left: 3px solid #4a9eff44;
+    border-radius: 0 8px 8px 0; padding: 6px 10px;
+    font-size: 11px; color: #64748b; margin-top: 6px; line-height: 1.5;
 }
-
-/* Filter labels */
-label[data-testid="stWidgetLabel"] p { color: #94a3b8 !important; font-size: 13px !important; }
-
-/* Hide streamlit branding */
-#MainMenu, footer { visibility: hidden; }
 </style>
 """, unsafe_allow_html=True)
+
 
 
 # ─────────────────────────────────────────────
